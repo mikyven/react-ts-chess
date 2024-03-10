@@ -1,0 +1,38 @@
+.board {
+  height: 750px;
+  width: 750px;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+
+  .coordinate {
+    font-size: 20px;
+    position: absolute;
+    margin: 0;
+    user-select: none;
+  }
+
+  .coordinate__number {
+    margin-left: 3px;
+  }
+
+  .coordinate__letter {
+    align-self: flex-end;
+    text-align: right;
+    width: calc(750px / 8 - 3px);
+  }
+
+  .square {
+    display: flex;
+  }
+
+  .square-white {
+    background-color: #eeeed2;
+    color: #769656;
+  }
+
+  .square-black {
+    background-color: #769656;
+    color: #eeeed2;
+  }
+}
