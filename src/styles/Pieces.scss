@@ -1,5 +1,6 @@
 .piece {
-  height: calc(750px / 8);
-  width: calc(750px / 8);
+  height: calc(75vh / 8);
+  width: calc(75vh / 8);
   user-select: none;
+  z-index: 1;
 }

@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "prepare": "husky && husky install"
   },
@@ -35,6 +34,6 @@
     "vite": "^5.1.4"
   },
   "lint-staged": {
-    "*.{ts,tsx}": "npm run lint"
+    "*.{ts,tsx}": "eslint --cache --fix"
   }
 }

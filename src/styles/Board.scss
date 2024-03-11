@@ -1,6 +1,6 @@
 .board {
-  height: 750px;
-  width: 750px;
+  height: 75vh;
+  width: 75vh;
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   grid-template-rows: repeat(8, 1fr);
@@ -19,7 +19,7 @@
   .coordinate__letter {
     align-self: flex-end;
     text-align: right;
-    width: calc(750px / 8 - 3px);
+    width: calc(75vh / 8 - 3px);
   }
 
   .square {
@@ -27,12 +27,12 @@
   }
 
   .square-white {
-    background-color: #eeeed2;
-    color: #769656;
+    background-color: #f0d9b5;
+    color: #b58863;
   }
 
   .square-black {
-    background-color: #769656;
-    color: #eeeed2;
+    background-color: #b58863;
+    color: #f0d9b5;
   }
 }

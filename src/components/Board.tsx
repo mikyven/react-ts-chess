@@ -1,6 +1,6 @@
 import { ReactElement, useState } from 'react';
 import '../styles/Board.scss';
-import { Pawn } from './Pieces/Pawn';
+import { King, Pawn, Knight, Bishop, Rook, Queen } from './Pieces';
 
 export function Board(): ReactElement {
   interface PieceObj {
@@ -55,7 +55,7 @@ export function Board(): ReactElement {
 
     for (let i = 21; i <= 28; i++) {
       WPawnsArr[WPawnsArr.length] = {
-        piece: <Pawn color="white" key={i} />,
+        piece: <Pawn color="white" />,
         position: i,
       };
     }
@@ -71,7 +71,27 @@ export function Board(): ReactElement {
   }
 
   const [squaresArr] = useState<string[]>(fillSquaresArr());
-  const [piecesArr] = useState<PieceObj[]>(fillPawnsArr());
+  const [piecesArr] = useState<PieceObj[]>(
+    [
+      { piece: <Rook color="white" />, position: 11 },
+      { piece: <Knight color="white" />, position: 12 },
+      { piece: <Bishop color="white" />, position: 13 },
+      { piece: <Queen color="white" />, position: 14 },
+      { piece: <King color="white" />, position: 15 },
+      { piece: <Bishop color="white" />, position: 16 },
+      { piece: <Knight color="white" />, position: 17 },
+      { piece: <Rook color="white" />, position: 18 },
+    ].concat(fillPawnsArr(), [
+      { piece: <Rook color="black" />, position: 81 },
+      { piece: <Knight color="black" />, position: 82 },
+      { piece: <Bishop color="black" />, position: 83 },
+      { piece: <Queen color="black" />, position: 84 },
+      { piece: <King color="black" />, position: 85 },
+      { piece: <Bishop color="black" />, position: 86 },
+      { piece: <Knight color="black" />, position: 87 },
+      { piece: <Rook color="black" />, position: 88 },
+    ])
+  );
 
   return (
     <div className="board">
