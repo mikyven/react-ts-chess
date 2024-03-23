@@ -13,7 +13,9 @@
   }
 
   .coordinate__number {
-    margin-left: 3px;
+    align-self: flex-start;
+    text-align: left;
+    width: calc(75vh / 8 - 3px);
   }
 
   .coordinate__letter {
@@ -23,7 +25,19 @@
   }
 
   .square {
+    height: calc(75vh / 8);
+    width: calc(75vh / 8);
     display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .active {
+      z-index: 1;
+      height: inherit;
+      width: inherit;
+      position: absolute;
+      background-color: rgba($color: #ffff33, $alpha: 0.6);
+    }
   }
 
   .square-white {

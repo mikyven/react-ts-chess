@@ -1,11 +1,13 @@
-import { ReactElement, useState } from 'react';
+import { ReactElement, useRef, useState } from 'react';
 import '../styles/Board.scss';
-import { King, Pawn, Knight, Bishop, Rook, Queen } from './Pieces';
+import { Piece } from './Pieces';
+import { MoveDot } from './MoveDot';
+import { onPawnClick, onRookClick } from './PiecesClickHandlers';
 
 export function Board(): ReactElement {
   interface PieceObj {
-    piece: ReactElement;
-    position: number;
+    piece: string;
+    pos: number;
   }
 
   function getSquareColor(sqrNum: string): string {
@@ -49,59 +51,152 @@ export function Board(): ReactElement {
     return arr;
   }
 
+  const [movesArr, setMovesArr] = useState<number[] | null>(null);
+
   function fillPawnsArr(): PieceObj[] {
-    const WPawnsArr = [];
-    const BPawnsArr = [];
+    const arr: PieceObj[] = [];
 
-    for (let i = 21; i <= 28; i++) {
-      WPawnsArr[WPawnsArr.length] = {
-        piece: <Pawn color="white" />,
-        position: i,
+    for (let w = 21; w <= 28; w++) {
+      arr[arr.length] = {
+        piece: 'wp',
+        pos: w,
+      };
+    }
+    for (let b = 71; b <= 78; b++) {
+      arr[arr.length] = {
+        piece: 'bp',
+        pos: b,
       };
     }
 
-    for (let i = 71; i <= 78; i++) {
-      BPawnsArr[BPawnsArr.length] = {
-        piece: <Pawn color="black" key={i} />,
-        position: i,
-      };
-    }
-
-    return WPawnsArr.concat(BPawnsArr);
+    return arr;
   }
 
   const [squaresArr] = useState<string[]>(fillSquaresArr());
   const [piecesArr] = useState<PieceObj[]>(
     [
-      { piece: <Rook color="white" />, position: 11 },
-      { piece: <Knight color="white" />, position: 12 },
-      { piece: <Bishop color="white" />, position: 13 },
-      { piece: <Queen color="white" />, position: 14 },
-      { piece: <King color="white" />, position: 15 },
-      { piece: <Bishop color="white" />, position: 16 },
-      { piece: <Knight color="white" />, position: 17 },
-      { piece: <Rook color="white" />, position: 18 },
+      {
+        piece: 'wr',
+        pos: 11,
+      },
+      {
+        piece: 'wn',
+        pos: 12,
+      },
+      {
+        piece: 'wb',
+        pos: 13,
+      },
+      {
+        piece: 'wq',
+        pos: 14,
+      },
+      {
+        piece: 'wk',
+        pos: 15,
+      },
+      {
+        piece: 'wb',
+        pos: 16,
+      },
+      {
+        piece: 'wn',
+        pos: 17,
+      },
+      {
+        piece: 'wr',
+        pos: 18,
+      },
     ].concat(fillPawnsArr(), [
-      { piece: <Rook color="black" />, position: 81 },
-      { piece: <Knight color="black" />, position: 82 },
-      { piece: <Bishop color="black" />, position: 83 },
-      { piece: <Queen color="black" />, position: 84 },
-      { piece: <King color="black" />, position: 85 },
-      { piece: <Bishop color="black" />, position: 86 },
-      { piece: <Knight color="black" />, position: 87 },
-      { piece: <Rook color="black" />, position: 88 },
+      {
+        piece: 'br',
+        pos: 81,
+      },
+      {
+        piece: 'bn',
+        pos: 82,
+      },
+      {
+        piece: 'bb',
+        pos: 83,
+      },
+      {
+        piece: 'bq',
+        pos: 84,
+      },
+      {
+        piece: 'bk',
+        pos: 85,
+      },
+      {
+        piece: 'bb',
+        pos: 86,
+      },
+      {
+        piece: 'bn',
+        pos: 87,
+      },
+      {
+        piece: 'br',
+        pos: 88,
+      },
     ])
   );
+  const posArr = Object.values(piecesArr).map((i) => i.pos);
+
+  const [activePos, setActivePos] = useState<number | null>(null);
+  const listRef = useRef<HTMLDivElement[] | null[]>([]);
+
+  function defineOnClick(piece: string, pos: number): () => void | null {
+    let foo: (() => void) | null = null;
+    switch (piece[1]) {
+      case 'p':
+        foo = (): void => setMovesArr(onPawnClick(piece[0], pos));
+        break;
+      case 'r':
+        foo = (): void => setMovesArr(onRookClick(pos, posArr));
+        break;
+      default:
+        break;
+    }
+    return () => {
+      if (foo) foo();
+      setActivePos(pos);
+    };
+  }
 
   return (
     <div className="board">
       {squaresArr.map((i) => (
         <div
-          className={`square square-${i} square-${getSquareColor(i)}`}
+          className={`square square-${i} square-${getSquareColor(i)} ${activePos === +i ? 'active' : ''}`}
+          onClick={(): void => {
+            if (!listRef.current[+i]?.children.length) {
+              setMovesArr([]);
+              setActivePos(null);
+            }
+          }}
+          ref={(ref): HTMLDivElement | null =>
+            listRef.current && (listRef.current[+i] = ref)
+          }
           key={i}
         >
+          {activePos === +i && <svg className="active" />}
           {displayCoordinates(i)}
-          {piecesArr.map((j) => (j.position === +i ? j.piece : false))}
+          {piecesArr.map((j) =>
+            j.pos === +i ? (
+              <Piece
+                piece={j.piece}
+                onClick={defineOnClick(j.piece, j.pos)}
+                key={i}
+              />
+            ) : (
+              false
+            )
+          )}
+          {movesArr?.map((k) =>
+            +i === k && !posArr.includes(k) ? <MoveDot key={k} /> : null
+          )}
         </div>
       ))}
     </div>
