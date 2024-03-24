@@ -154,7 +154,7 @@ export function Board(): ReactElement {
         foo = (): void => setMovesArr(onPawnClick(piece[0], pos));
         break;
       case 'r':
-        foo = (): void => setMovesArr(onRookClick(pos, posArr));
+        foo = (): void => setMovesArr(onRookClick(piece[0], pos, posArr));
         break;
       default:
         break;

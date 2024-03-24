@@ -5,36 +5,41 @@ export function onPawnClick(color: string, curPos: number): number[] {
   return curPos >= 71 ? [curPos - 10, curPos - 20] : [curPos - 10];
 }
 
-export function onRookClick(curPos: number, extPosArr: number[]): number[] {
+export function onRookClick(
+  color: string,
+  curPos: number,
+  extPosArr: number[]
+): number[] {
   const posArr: number[] = [];
 
-  /* eslint-disable prettier/prettier */
-  const nextPieceIndexes: number[] = [
-    extPosArr[
-    extPosArr
-      .map((i) => (i !== curPos && i > curPos ? `${i}`[1] : false))
-      .indexOf(`${curPos}`[1])
-    ],
-    extPosArr[
-    extPosArr
-      .map((i) => (i !== curPos && i > curPos ? `${i}`[0] : false))
-      .indexOf(`${curPos}`[0])
-    ],
-  ];
+  function fillIndexesArr(arr: number[], sign: string): number[] {
+    const revdArr = [...arr].reverse();
+    const searchForPieces = (a: number[], index: number): number =>
+      a
+        .map((i: number) => {
+          if (
+            i !== curPos && String(i)[1] === String(curPos)[1] && sign === '>'
+              ? i > curPos
+              : i < curPos
+          ) {
+            return `${i}`[index];
+          }
+          return false;
+        })
+        .indexOf(`${curPos}`[index]);
 
-  const prevPieceIndexes: number[] = [
-    extPosArr[
-    extPosArr
-      .map((i) => (i !== curPos && i < curPos ? `${i}`[1] : false))
-      .indexOf(`${curPos}`[1])
-    ],
-    extPosArr[
-    extPosArr
-      .map((i) => (i !== curPos && i < curPos ? `${i}`[0] : false))
-      .indexOf(`${curPos}`[0])
-    ],
-  ];
-  /* eslint-enable prettier/prettier */
+    if (color === 'w') {
+      return [arr[searchForPieces(arr, 1)], arr[searchForPieces(arr, 0)]];
+    }
+
+    return [
+      revdArr[searchForPieces(revdArr, 1)],
+      revdArr[searchForPieces(revdArr, 0)],
+    ];
+  }
+
+  const nextPieceIndexes: number[] = fillIndexesArr(extPosArr, '>');
+  const prevPieceIndexes: number[] = fillIndexesArr(extPosArr, '<');
 
   // vertical
   for (
