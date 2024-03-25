@@ -7,14 +7,10 @@ export function Piece(props: {
 }): ReactElement {
   const { piece, onClick } = props;
 
-  const realOnClick = (): void => {
-    onClick();
-  };
-
   return (
     <img
       className={`piece ${piece}`}
-      onClick={realOnClick}
+      onClick={onClick}
       src={`src/images/${piece}.svg`}
       alt=""
       draggable="false"

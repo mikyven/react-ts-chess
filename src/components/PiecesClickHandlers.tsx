@@ -5,46 +5,37 @@ export function onPawnClick(color: string, curPos: number): number[] {
   return curPos >= 71 ? [curPos - 10, curPos - 20] : [curPos - 10];
 }
 
-export function onRookClick(
-  color: string,
-  curPos: number,
-  extPosArr: number[]
-): number[] {
+export function onRookClick(curPos: number, extPosArr: number[]): number[] {
   const posArr: number[] = [];
 
-  function fillIndexesArr(arr: number[], sign: string): number[] {
-    const revdArr = [...arr].reverse();
-    const searchForPieces = (a: number[], index: number): number =>
-      a
-        .map((i: number) => {
-          if (
-            i !== curPos && String(i)[1] === String(curPos)[1] && sign === '>'
-              ? i > curPos
-              : i < curPos
-          ) {
-            return `${i}`[index];
-          }
-          return false;
-        })
-        .indexOf(`${curPos}`[index]);
-
-    if (color === 'w') {
-      return [arr[searchForPieces(arr, 1)], arr[searchForPieces(arr, 0)]];
-    }
-
-    return [
-      revdArr[searchForPieces(revdArr, 1)],
-      revdArr[searchForPieces(revdArr, 0)],
-    ];
+  function findPiece(arr: number[], index: number, sign: string): number {
+    arr = arr.filter((i: number) => {
+      if (
+        i !== curPos &&
+        `${i}`[index] !== `${curPos}`[index] &&
+        (index - 1 === 0
+          ? `${i}`[index - 1] === `${curPos}`[index - 1]
+          : `${i}`[index + 1] === `${curPos}`[index + 1]) &&
+        (sign === '>' ? i > curPos : i < curPos)
+      ) {
+        return `${i}`[index];
+      }
+      return false;
+    });
+    return sign === '>' ? +arr.slice(0, 1) : +arr.slice(-1);
   }
 
-  const nextPieceIndexes: number[] = fillIndexesArr(extPosArr, '>');
-  const prevPieceIndexes: number[] = fillIndexesArr(extPosArr, '<');
+  const nearPieces: Record<'up' | 'down' | 'right' | 'left', number> = {
+    up: findPiece(extPosArr, 0, '>'),
+    down: findPiece(extPosArr, 0, '<'),
+    right: findPiece(extPosArr, 1, '>'),
+    left: findPiece(extPosArr, 1, '<'),
+  };
 
   // vertical
   for (
-    let i = prevPieceIndexes[0] || +'1'.concat(`${curPos}`[1]);
-    i <= (nextPieceIndexes[0] || +'8'.concat(`${curPos}`[1]));
+    let i = nearPieces.down || +'1'.concat(`${curPos}`[1]);
+    i <= (nearPieces.up || +'8'.concat(`${curPos}`[1]));
     i += 10
   ) {
     posArr.push(i);
@@ -52,8 +43,8 @@ export function onRookClick(
 
   // horizontal
   for (
-    let i = prevPieceIndexes[1] || +`${curPos}`[0].concat('1');
-    i <= (nextPieceIndexes[1] || +`${curPos}`[0].concat('8'));
+    let i = nearPieces.left || +`${curPos}`[0].concat('1');
+    i <= (nearPieces.right || +`${curPos}`[0].concat('8'));
     i += 1
   ) {
     posArr.push(i);
