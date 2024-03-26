@@ -56,18 +56,18 @@ export function Board(): ReactElement {
   function fillPawnsArr(): PieceObj[] {
     const arr: PieceObj[] = [];
 
-    // for (let w = 21; w <= 28; w++) {
-    //   arr[arr.length] = {
-    //     piece: 'wp',
-    //     pos: w,
-    //   };
-    // }
-    // for (let b = 71; b <= 78; b++) {
-    //   arr[arr.length] = {
-    //     piece: 'bp',
-    //     pos: b,
-    //   };
-    // }
+    for (let w = 21; w <= 28; w++) {
+      arr[arr.length] = {
+        piece: 'wp',
+        pos: w,
+      };
+    }
+    for (let b = 71; b <= 78; b++) {
+      arr[arr.length] = {
+        piece: 'bp',
+        pos: b,
+      };
+    }
 
     return arr;
   }
@@ -79,30 +79,30 @@ export function Board(): ReactElement {
         piece: 'wr',
         pos: 11,
       },
-      // {
-      //   piece: 'wn',
-      //   pos: 12,
-      // },
-      // {
-      //   piece: 'wb',
-      //   pos: 13,
-      // },
-      // {
-      //   piece: 'wq',
-      //   pos: 14,
-      // },
-      // {
-      //   piece: 'wk',
-      //   pos: 15,
-      // },
-      // {
-      //   piece: 'wb',
-      //   pos: 16,
-      // },
-      // {
-      //   piece: 'wn',
-      //   pos: 17,
-      // },
+      {
+        piece: 'wn',
+        pos: 12,
+      },
+      {
+        piece: 'wb',
+        pos: 13,
+      },
+      {
+        piece: 'wq',
+        pos: 14,
+      },
+      {
+        piece: 'wk',
+        pos: 15,
+      },
+      {
+        piece: 'wb',
+        pos: 16,
+      },
+      {
+        piece: 'wn',
+        pos: 17,
+      },
       {
         piece: 'wr',
         pos: 18,
@@ -112,30 +112,30 @@ export function Board(): ReactElement {
         piece: 'br',
         pos: 81,
       },
-      // {
-      //   piece: 'bn',
-      //   pos: 82,
-      // },
-      // {
-      //   piece: 'bb',
-      //   pos: 83,
-      // },
-      // {
-      //   piece: 'bq',
-      //   pos: 84,
-      // },
-      // {
-      //   piece: 'bk',
-      //   pos: 85,
-      // },
-      // {
-      //   piece: 'bb',
-      //   pos: 86,
-      // },
-      // {
-      //   piece: 'bn',
-      //   pos: 87,
-      // },
+      {
+        piece: 'bn',
+        pos: 82,
+      },
+      {
+        piece: 'bb',
+        pos: 83,
+      },
+      {
+        piece: 'bq',
+        pos: 84,
+      },
+      {
+        piece: 'bk',
+        pos: 85,
+      },
+      {
+        piece: 'bb',
+        pos: 86,
+      },
+      {
+        piece: 'bn',
+        pos: 87,
+      },
       {
         piece: 'br',
         pos: 88,
@@ -148,10 +148,12 @@ export function Board(): ReactElement {
   const listRef = useRef<HTMLDivElement[] | null[]>([]);
 
   function defineOnClick(piece: string, pos: number): () => void | null {
+    /* piece[0] is color
+       piece[1] is piece name */
     let foo: (() => void) | null = null;
     switch (piece[1]) {
       case 'p':
-        foo = (): void => setMovesArr(onPawnClick(piece[0], pos));
+        foo = (): void => setMovesArr(onPawnClick(piece[0], pos, posArr));
         break;
       case 'r':
         foo = (): void => setMovesArr(onRookClick(pos, posArr));
