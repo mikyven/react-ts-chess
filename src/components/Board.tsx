@@ -145,7 +145,7 @@ export function Board(): ReactElement {
   const posArr = Object.values(piecesArr).map((i) => i.pos);
 
   const [activePos, setActivePos] = useState<number | null>(null);
-  const listRef = useRef<HTMLDivElement[] | null[]>([]);
+  const squareRefs = useRef<HTMLDivElement[] | null[]>([]);
 
   function defineOnClick(piece: string, pos: number): () => void | null {
     /* piece[0] is color
@@ -173,13 +173,13 @@ export function Board(): ReactElement {
         <div
           className={`square square-${i} square-${getSquareColor(i)} ${activePos === +i ? 'active' : ''}`}
           onClick={(): void => {
-            if (!listRef.current[+i]?.children.length) {
+            if (!squareRefs.current[+i]?.children.length) {
               setMovesArr([]);
               setActivePos(null);
             }
           }}
           ref={(ref): HTMLDivElement | null =>
-            listRef.current && (listRef.current[+i] = ref)
+            squareRefs.current && (squareRefs.current[+i] = ref)
           }
           key={i}
         >

@@ -23,21 +23,28 @@ export function onPawnClick(
   curPos: number,
   posArr: number[]
 ): number[] {
-  // const nearestPieceAbove = findPiece(posArr, curPos, 0, '>')
+  if (
+    (color === 'w' && findPiece(posArr, curPos, 0, '>') === curPos + 10) ||
+    (color === 'b' && findPiece(posArr, curPos, 0, '<') === curPos - 10)
+  ) {
+    return [];
+  }
+
   const movesArr: number[] = [];
   const movesNumber =
-    (color === 'w' && curPos <= 28) || (color === 'b' && curPos <= 71) ? 2 : 1;
+    (color === 'w' && curPos <= 28) || (color === 'b' && curPos >= 71) ? 2 : 1;
 
-  if (color === 'w')
+  if (color === 'w') {
     for (let i = curPos + 10; i <= curPos + movesNumber * 10; i += 10) {
       movesArr.push(i);
     }
-  else
+  } else if (color === 'b') {
     for (let i = curPos - movesNumber * 10; i < curPos; i += 10) {
       movesArr.push(i);
     }
+  }
 
-  return movesArr.filter((i) => posArr.includes(i));
+  return movesArr.filter((i) => !posArr.includes(i));
 }
 
 export function onRookClick(curPos: number, posArr: number[]): number[] {
@@ -68,5 +75,5 @@ export function onRookClick(curPos: number, posArr: number[]): number[] {
     movesArr.push(i);
   }
 
-  return posArr.filter((i) => posArr.includes(i));
+  return movesArr.filter((i) => !posArr.includes(i));
 }
