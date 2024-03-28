@@ -2,7 +2,13 @@
   height: calc(75vh / 8);
   width: calc(75vh / 8);
   user-select: none;
-  z-index: 1;
+  z-index: 0;
+
+  &.dragging {
+    position: absolute;
+    z-index: 1;
+    cursor: grabbing;
+  }
 }
 
 .move_dot {
