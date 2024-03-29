@@ -4,32 +4,33 @@ import '../styles/Pieces.scss';
 export function Piece(props: {
   piece: string;
   onClick: () => void;
+  boardCoords: { x: number; y: number };
 }): ReactElement {
-  const { piece, onClick } = props;
+  const { piece, onClick, boardCoords } = props;
   const [isMouseDown, setIsMouseDown] = useState<boolean>(false);
-  const [startMouseCoords, setStartMouseCoords] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
 
   const onGrab = (e: React.MouseEvent): void => {
-    setStartMouseCoords({ x: e.clientX, y: e.clientY });
+    setIsMouseDown(true);
     const p = e.target as HTMLElement;
     p.classList.add('dragging');
-    setIsMouseDown(true);
   };
 
-  // const onDragStart = (e: React.MouseEvent): void => {
-  //   const p = e.target as HTMLElement;
-  //   p.classList.add('dragging');
-  // };
-
-  const onDrag = (e: React.MouseEvent): void => {
+  const onDragOver = (e: React.MouseEvent): void => {
     if (isMouseDown) {
       const p = e.target as HTMLElement;
 
-      p.style.transform = `translate(${startMouseCoords && e.clientX - startMouseCoords.x}px, ${startMouseCoords && e.clientY - startMouseCoords.y}px)`;
+      const x = e.clientX > boardCoords.x ? e.clientX - 50 : boardCoords.x - 50;
+      const y = e.clientY > boardCoords.x ? e.clientY - 50 : boardCoords.y - 50;
+
+      p.style.left = `${x}px`;
+      p.style.top = `${y}px`;
     }
+  };
+
+  const onDragEnd = (e: React.MouseEvent): void => {
+    setIsMouseDown(false);
+    const p = e.target as HTMLElement;
+    p.classList.remove('dragging');
   };
 
   return (
@@ -37,12 +38,11 @@ export function Piece(props: {
       className={`piece ${piece}`}
       onClick={onClick}
       onMouseDown={onGrab}
-      // onDragStart={onDragStart}
-      onDragOver={onDrag}
-      onMouseUp={(): void => setIsMouseDown(false)}
+      onMouseMove={onDragOver}
+      onMouseUp={onDragEnd}
       src={`src/images/${piece}.svg`}
-      draggable="true"
       alt=""
+      draggable={false}
     />
   );
 }
