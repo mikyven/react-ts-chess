@@ -2,7 +2,7 @@ import { ReactElement, useRef, useState } from 'react';
 import '../styles/Board.scss';
 import { Piece } from './Pieces';
 import { MoveDot } from './MoveDot';
-// import { onPawnClick, onRookClick } from './PiecesClickHandlers';
+import { onPawnClick, onRookClick } from './PiecesClickHandlers';
 
 export function Board(): ReactElement {
   interface PieceObj {
@@ -147,36 +147,35 @@ export function Board(): ReactElement {
   const [activePos, setActivePos] = useState<number | null>(null);
   const [activePiece, setActivePiece] = useState<HTMLElement | null>(null);
   const boardRef = useRef<HTMLDivElement | null>(null);
-  const squareRefs = useRef<HTMLDivElement[] | null[]>([]);
 
-  // function defineOnClick(piece: string, pos: number): () => void | null {
-  //   /* piece[0] is color
-  //      piece[1] is piece name */
-  //   let foo: (() => void) | null = null;
-  //   switch (piece[1]) {
-  //     case 'p':
-  //       foo = (): void => setMovesArr(onPawnClick(piece[0], pos, posArr));
-  //       break;
-  //     case 'r':
-  //       foo = (): void => setMovesArr(onRookClick(pos, posArr));
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  //   return () => {
-  //     if (foo) foo();
-  //     setActivePos(pos);
-  //   };
-  // }
+  function defineMoves(piece: string, pos: number): void {
+    switch (piece[1]) {
+      case 'p':
+        setMovesArr(onPawnClick(piece[0], pos, posArr));
+        break;
+      case 'r':
+        setMovesArr(onRookClick(pos, posArr));
+        break;
+      default:
+        break;
+    }
+  }
 
   const [isMouseDown, setIsMouseDown] = useState(false);
 
   const onMouseDown = (e: React.MouseEvent): void => {
+    setMovesArr([]);
+    setActivePos(null);
     setIsMouseDown(true);
     const p = e.target as HTMLElement;
     if (p.classList.contains('piece')) {
       p.classList.add('dragging');
       setActivePiece(p);
+      if (p.parentElement) {
+        const pos = +p.parentElement.classList[1].slice(-2);
+        setActivePos(pos);
+        defineMoves(p.classList[1], pos);
+      }
     }
   };
 
@@ -213,34 +212,12 @@ export function Board(): ReactElement {
       {squaresArr.map((i) => (
         <div
           className={`square square-${i} square-${getSquareColor(i)} ${activePos === +i ? 'active' : ''}`}
-          onClick={(): void => {
-            if (!squareRefs.current[+i]?.children.length) {
-              setMovesArr([]);
-              setActivePos(null);
-            }
-          }}
-          ref={(ref): HTMLDivElement | null =>
-            squareRefs.current && (squareRefs.current[+i] = ref)
-          }
           key={i}
         >
           {activePos === +i && <svg className="active" />}
           {displayCoordinates(i)}
           {piecesArr.map((j) =>
-            j.pos === +i ? (
-              <Piece
-                piece={j.piece}
-                // onClick={defineOnClick(j.piece, j.pos)}
-                // dragFuncs={{
-                //   down: onMouseDown,
-                //   move: onMouseMove,
-                //   up: onMouseUp,
-                // }}
-                key={i}
-              />
-            ) : (
-              false
-            )
+            j.pos === +i ? <Piece piece={j.piece} key={i} /> : false
           )}
           {movesArr?.map((k) =>
             +i === k && !posArr.includes(k) ? <MoveDot key={k} /> : null
