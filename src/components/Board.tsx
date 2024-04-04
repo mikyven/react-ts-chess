@@ -181,8 +181,8 @@ export function Board(): ReactElement {
 
   const onMouseMove = (e: React.MouseEvent): void => {
     if (boardRef.current && isMouseDown && activePiece) {
-      const boardX = boardRef.current.clientLeft;
-      const boardY = boardRef.current.clientTop;
+      const boardX = boardRef.current.offsetLeft;
+      const boardY = boardRef.current.offsetTop;
 
       const x = e.clientX > boardX ? e.clientX - 50 : boardX - 50;
       const y = e.clientY > boardY ? e.clientY - 50 : boardY - 50;
@@ -192,12 +192,28 @@ export function Board(): ReactElement {
     }
   };
 
-  const onMouseUp = (): void => {
+  const onMouseUp = (e: React.MouseEvent): void => {
     setIsMouseDown(false);
     if (activePiece) {
       activePiece.classList.remove('dragging');
       activePiece.style.left = '';
       activePiece.style.top = '';
+      setActivePiece(null);
+
+      if (boardRef.current) {
+        const squareSize = boardRef.current.offsetHeight / 8;
+
+        const bodyHeight = document.body.offsetHeight;
+        const boardTop = boardRef.current.offsetTop;
+        const y = e.clientY;
+        const ySquare = Math.ceil((bodyHeight - y - boardTop) / squareSize);
+
+        const boardLeft = boardRef.current.offsetLeft;
+        const x = e.clientX;
+        const xSquare = Math.ceil((x - boardLeft) / squareSize);
+
+        setActivePos(+`${ySquare}${xSquare}`);
+      }
     }
   };
 
