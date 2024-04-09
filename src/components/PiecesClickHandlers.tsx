@@ -1,9 +1,6 @@
-function findPiece(
-  arr: number[],
-  pos: number,
-  index: number,
-  sign: string
-): number {
+function findPiece(arr: number[], pos: number, dir: string): number {
+  const index = dir === 'u' || dir === 'd' ? 0 : 1;
+  const sign = dir === 'u' || dir === 'r' ? '>' : '<';
   const oppositeIndex = index - 1 === 0 ? index - 1 : index + 1;
   arr = arr.filter((i: number) => {
     if (
@@ -24,8 +21,8 @@ export function onPawnClick(
   posArr: number[]
 ): number[] {
   if (
-    (color === 'w' && findPiece(posArr, curPos, 0, '>') === curPos + 10) ||
-    (color === 'b' && findPiece(posArr, curPos, 0, '<') === curPos - 10)
+    (color === 'w' && findPiece(posArr, curPos, 'u') === curPos + 10) ||
+    (color === 'b' && findPiece(posArr, curPos, 'd') === curPos - 10)
   ) {
     return [];
   }
@@ -51,10 +48,10 @@ export function onRookClick(curPos: number, posArr: number[]): number[] {
   const movesArr: number[] = [];
 
   const nearPieces: Record<'up' | 'down' | 'right' | 'left', number> = {
-    up: findPiece(posArr, curPos, 0, '>'),
-    down: findPiece(posArr, curPos, 0, '<'),
-    right: findPiece(posArr, curPos, 1, '>'),
-    left: findPiece(posArr, curPos, 1, '<'),
+    up: findPiece(posArr, curPos, 'u'),
+    down: findPiece(posArr, curPos, 'd'),
+    right: findPiece(posArr, curPos, 'r'),
+    left: findPiece(posArr, curPos, 'l'),
   };
 
   // vertical
@@ -75,5 +72,16 @@ export function onRookClick(curPos: number, posArr: number[]): number[] {
     movesArr.push(i);
   }
 
+  return movesArr.filter((i) => !posArr.includes(i));
+}
+
+export function onKnightClick(curPos: number, posArr: number[]): number[] {
+  const movesArr: number[] = [];
+  const posRange = [...Array(8).keys()].map((i) => i + 1);
+  for (let i = curPos - 20; i <= curPos + 21; i += 40) {
+    if (posRange.includes(+`${i}`[0]) && posRange.includes(+`${i}`[1])) {
+      movesArr.push(i - 1, i + 1);
+    }
+  }
   return movesArr.filter((i) => !posArr.includes(i));
 }
