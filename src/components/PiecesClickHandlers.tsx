@@ -41,7 +41,9 @@ export function onPawnClick(
     }
   }
 
-  return movesArr.filter((i) => !posArr.includes(i));
+  return movesArr.filter(
+    (i) => !posArr.includes(i) && i >= 11 && i <= 88 && +`${i}`[1] <= 8
+  );
 }
 
 export function onRookClick(curPos: number, posArr: number[]): number[] {
@@ -77,11 +79,27 @@ export function onRookClick(curPos: number, posArr: number[]): number[] {
 
 export function onKnightClick(curPos: number, posArr: number[]): number[] {
   const movesArr: number[] = [];
-  const posRange = [...Array(8).keys()].map((i) => i + 1);
   for (let i = curPos - 20; i <= curPos + 21; i += 40) {
-    if (posRange.includes(+`${i}`[0]) && posRange.includes(+`${i}`[1])) {
-      movesArr.push(i - 1, i + 1);
-    }
+    movesArr.push(i - 1, i + 1);
   }
-  return movesArr.filter((i) => !posArr.includes(i));
+  for (let i = curPos - 10; i <= curPos + 12; i += 20) {
+    movesArr.push(i - 2, i + 2);
+  }
+
+  return movesArr.filter(
+    (i) => !posArr.includes(i) && i >= 11 && i <= 88 && +`${i}`[1] <= 8
+  );
+}
+
+export function onBishopClick(curPos: number, posArr: number[]): number[] {
+  const movesArr: number[] = [];
+
+  for (let i = curPos + 11; i <= 88; i += 11) {
+    if (posArr.includes(i)) break;
+    movesArr.push(i);
+  }
+
+  return movesArr.filter(
+    (i) => !posArr.includes(i) && i >= 11 && i <= 88 && +`${i}`[1] <= 8
+  );
 }

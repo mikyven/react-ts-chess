@@ -1,7 +1,12 @@
 import { ReactElement, useRef, useState } from 'react';
 import '../styles/Board.scss';
 import { Piece } from './Pieces';
-import { onKnightClick, onPawnClick, onRookClick } from './PiecesClickHandlers';
+import {
+  onBishopClick,
+  onKnightClick,
+  onPawnClick,
+  onRookClick,
+} from './PiecesClickHandlers';
 
 export function Board(): ReactElement {
   interface PieceObj {
@@ -80,7 +85,7 @@ export function Board(): ReactElement {
       },
       {
         piece: 'wn',
-        pos: 42,
+        pos: 12,
       },
       {
         piece: 'wb',
@@ -158,6 +163,9 @@ export function Board(): ReactElement {
       case 'n':
         setMovesArr(onKnightClick(pos, posArr));
         break;
+      case 'b':
+        setMovesArr(onBishopClick(pos, posArr));
+        break;
       default:
         break;
     }
@@ -201,14 +209,14 @@ export function Board(): ReactElement {
 
     setMovesArr([]);
     setActivePosArr([]);
-    setIsMouseDown(true);
     if (p.classList.contains('piece')) {
+      setIsMouseDown(true);
       p.classList.add('dragging');
       setActivePiece(p);
       if (p.parentElement) {
         const pos = +p.parentElement.classList[1].slice(-2);
         setActivePosArr([pos]);
-        defineMoves(p.classList[1], pos);
+        if (p.classList[1][0] === turn) defineMoves(p.classList[1], pos);
       }
     }
   };
