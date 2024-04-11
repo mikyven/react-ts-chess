@@ -15,6 +15,12 @@ function findPiece(arr: number[], pos: number, dir: string): number {
   return sign === '>' ? +arr.slice(0, 1) : +arr.slice(-1);
 }
 
+function diagonalFilterFunc(curPos: number, num: number, sign: string) {
+  return (n: number): boolean =>
+    (sign === '>' ? n > curPos : n < curPos) &&
+    (num === 1 ? curPos % 11 === n % 11 : curPos % 9 === n % 9);
+}
+
 export function onPawnClick(
   color: string,
   curPos: number,
@@ -94,12 +100,55 @@ export function onKnightClick(curPos: number, posArr: number[]): number[] {
 export function onBishopClick(curPos: number, posArr: number[]): number[] {
   const movesArr: number[] = [];
 
-  for (let i = curPos + 11; i <= 88; i += 11) {
-    if (posArr.includes(i)) break;
-    movesArr.push(i);
+  let firstMin = Math.max(...posArr.filter(diagonalFilterFunc(curPos, 1, '<')));
+  let firstMax = Math.min(...posArr.filter(diagonalFilterFunc(curPos, 1, '>')));
+  let secondMin = Math.max(
+    ...posArr.filter(diagonalFilterFunc(curPos, 2, '<'))
+  );
+  let secondMax = Math.min(
+    ...posArr.filter(diagonalFilterFunc(curPos, 2, '>'))
+  );
+
+  if (firstMin === -Infinity) firstMin = (curPos % 11) + 11;
+  if (firstMax === Infinity) firstMax = 88 + (curPos % 11);
+  if (secondMin === -Infinity) secondMin = (curPos % 9) + 9;
+  if (secondMax === Infinity) secondMax = 88 + (curPos % 9);
+
+  for (let i = firstMin; i <= firstMax; i += 11) {
+    if (!posArr.includes(i)) movesArr.push(i);
   }
 
-  return movesArr.filter(
-    (i) => !posArr.includes(i) && i >= 11 && i <= 88 && +`${i}`[1] <= 8
+  for (let i = secondMin; i <= secondMax; i += 9) {
+    if (!posArr.includes(i)) movesArr.push(i);
+  }
+
+  return movesArr;
+}
+
+export function onQueenClick(curPos: number, posArr: number[]): number[] {
+  const movesArr: number[] = [curPos - 1, curPos + 1, curPos - 10, curPos + 10];
+
+  let firstMin = Math.max(...posArr.filter(diagonalFilterFunc(curPos, 1, '<')));
+  let firstMax = Math.min(...posArr.filter(diagonalFilterFunc(curPos, 1, '>')));
+  let secondMin = Math.max(
+    ...posArr.filter(diagonalFilterFunc(curPos, 2, '<'))
   );
+  let secondMax = Math.min(
+    ...posArr.filter(diagonalFilterFunc(curPos, 2, '>'))
+  );
+
+  if (firstMin === -Infinity) firstMin = (curPos % 11) + 11;
+  if (firstMax === Infinity) firstMax = 88 + (curPos % 11);
+  if (secondMin === -Infinity) secondMin = (curPos % 9) + 9;
+  if (secondMax === Infinity) secondMax = 88 + (curPos % 9);
+
+  for (let i = firstMin; i <= firstMax; i += 11) {
+    if (!posArr.includes(i)) movesArr.push(i);
+  }
+
+  for (let i = secondMin; i <= secondMax; i += 9) {
+    if (!posArr.includes(i)) movesArr.push(i);
+  }
+
+  return movesArr;
 }

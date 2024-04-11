@@ -5,6 +5,7 @@ import {
   onBishopClick,
   onKnightClick,
   onPawnClick,
+  onQueenClick,
   onRookClick,
 } from './PiecesClickHandlers';
 
@@ -165,6 +166,9 @@ export function Board(): ReactElement {
         break;
       case 'b':
         setMovesArr(onBishopClick(pos, posArr));
+        break;
+      case 'q':
+        setMovesArr(onQueenClick(pos, posArr));
         break;
       default:
         break;
