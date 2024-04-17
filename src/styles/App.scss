@@ -1,6 +1,35 @@
-body {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.attribute-link {
+  width: 15vw;
+  position: absolute;
+  left: calc(50% - 7.5vw);
+  bottom: 5px;
+  text-align: center;
+  text-decoration: none;
+  color: white;
+  font-size: 8px;
+}
+
+.header {
+  user-select: none;
+}
+
+.play-btn {
+  width: 100px;
+  height: 50px;
+  font-family: inherit;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  border: 2px solid #ff9900;
+  background-color: inherit;
+  color: #ff9900;
+  transition:
+    background-color 0.3s ease-in,
+    color 0.3s ease-in;
+
+  &:hover {
+    border: none;
+    color: white;
+    background-color: #ff9900;
+  }
 }

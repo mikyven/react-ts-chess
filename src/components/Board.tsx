@@ -1,13 +1,7 @@
 import { ReactElement, useRef, useState } from 'react';
 import '../styles/Board.scss';
 import { Piece } from './Pieces';
-import {
-  onBishopClick,
-  onKnightClick,
-  onPawnClick,
-  onQueenClick,
-  onRookClick,
-} from './PiecesClickHandlers';
+// import { onPieceGrab } from './PiecesGrabHandlers';
 
 export function Board(): ReactElement {
   interface PieceObj {
@@ -45,18 +39,8 @@ export function Board(): ReactElement {
     return false;
   }
 
-  function fillSquaresArr(): string[] {
-    const arr = [];
-
-    for (let i = 1; i <= 8; i++) {
-      for (let j = 1; j <= 8; j++) {
-        arr[arr.length] = `${9 - i}${j}`;
-      }
-    }
-    return arr;
-  }
-
   const [movesArr, setMovesArr] = useState<number[] | null>(null);
+  const [capturesArr, setCapturesArr] = useState<number[] | null>(null);
 
   function fillPawnsArr(): PieceObj[] {
     const arr: PieceObj[] = [];
@@ -77,7 +61,6 @@ export function Board(): ReactElement {
     return arr;
   }
 
-  const [squaresArr] = useState<string[]>(fillSquaresArr());
   const [piecesArr, setPiecesArr] = useState<PieceObj[]>(
     [
       {
@@ -147,47 +130,28 @@ export function Board(): ReactElement {
       },
     ])
   );
-  const posArr = Object.values(piecesArr).map((i) => i.pos);
+  // const posArr = Object.values(piecesArr).map((i) => i.pos);
 
   const [activePosArr, setActivePosArr] = useState<number[]>([]);
   const [activePiece, setActivePiece] = useState<HTMLElement | null>(null);
   const boardRef = useRef<HTMLDivElement | null>(null);
-
-  function defineMoves(piece: string, pos: number): void {
-    switch (piece[1]) {
-      case 'p':
-        setMovesArr(onPawnClick(piece[0], pos, posArr));
-        break;
-      case 'r':
-        setMovesArr(onRookClick(pos, posArr));
-        break;
-      case 'n':
-        setMovesArr(onKnightClick(pos, posArr));
-        break;
-      case 'b':
-        setMovesArr(onBishopClick(pos, posArr));
-        break;
-      case 'q':
-        setMovesArr(onQueenClick(pos, posArr));
-        break;
-      default:
-        break;
-    }
-  }
 
   const [isMouseDown, setIsMouseDown] = useState(false);
   const [move, setMove] = useState<number>(0);
   const turn = move % 2 === 0 ? 'w' : 'b';
 
   const movePiece = (newPos: number): void => {
-    if (movesArr?.includes(newPos)) {
+    if (movesArr?.includes(newPos) || capturesArr?.includes(newPos)) {
       setPiecesArr(
-        piecesArr.map((i) =>
-          activePosArr.includes(i.pos) ? { piece: i.piece, pos: newPos } : i
-        )
+        piecesArr
+          .filter((i) => i.pos !== newPos)
+          .map((i) =>
+            activePosArr.includes(i.pos) ? { piece: i.piece, pos: newPos } : i
+          )
       );
       setMove(move + 1);
       setMovesArr([]);
+      setCapturesArr([]);
       setActivePosArr([...activePosArr, newPos]);
       setActivePiece(null);
     }
@@ -199,12 +163,12 @@ export function Board(): ReactElement {
     if (
       activePiece &&
       activePiece.classList[1][0] === turn &&
-      (p.classList.contains('square') || p.classList.contains('move-dot'))
+      ((p.children.length > 0 && p.children[0].classList.contains('hint')) ||
+        p.classList.contains('hint'))
     ) {
       let el = p;
 
-      if (p.classList.contains('move-dot') && p.parentElement)
-        el = p.parentElement;
+      if (p.classList.contains('hint') && p.parentElement) el = p.parentElement;
 
       const pos = +el.classList[1].slice(-2);
       movePiece(pos);
@@ -212,6 +176,7 @@ export function Board(): ReactElement {
     }
 
     setMovesArr([]);
+    setCapturesArr([]);
     setActivePosArr([]);
     if (p.classList.contains('piece')) {
       setIsMouseDown(true);
@@ -220,7 +185,17 @@ export function Board(): ReactElement {
       if (p.parentElement) {
         const pos = +p.parentElement.classList[1].slice(-2);
         setActivePosArr([pos]);
-        if (p.classList[1][0] === turn) defineMoves(p.classList[1], pos);
+        if (p.classList[1][0] === turn) {
+          // const arr = onPieceGrab(
+          //   p.classList[1],
+          //   pos,
+          //   posArr,
+          //   piecesArr.map((i) => i.piece)
+          // );
+          // arr[0] and arr[1] under; if i put it there now it'll be an error
+          setMovesArr([]);
+          setCapturesArr([]);
+        }
       }
     }
   };
@@ -280,6 +255,32 @@ export function Board(): ReactElement {
     }
   };
 
+  const squaresArr = [];
+
+  for (let x = 1; x <= 8; x++) {
+    for (let y = 1; y <= 8; y++) {
+      const pos = `${9 - x}${y}`;
+      squaresArr.push(
+        <div
+          className={`square square-${pos} square-${getSquareColor(pos)} ${activePosArr.includes(+pos) ? 'active' : ''} `}
+          key={pos}
+        >
+          {activePosArr.includes(+pos) && <svg className="active" />}
+          {displayCoordinates(pos)}
+          {piecesArr.map((j) =>
+            j.pos === +pos ? <Piece piece={j.piece} key={pos} /> : false
+          )}
+          {movesArr?.map((k) =>
+            +pos === k ? <div className="hint hint_move" key={k} /> : null
+          )}
+          {capturesArr?.map((k) =>
+            +pos === k ? <div className="hint hint_capture" key={k} /> : null
+          )}
+        </div>
+      );
+    }
+  }
+
   return (
     <div
       className="board"
@@ -288,21 +289,7 @@ export function Board(): ReactElement {
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
     >
-      {squaresArr.map((i) => (
-        <div
-          className={`square square-${i} square-${getSquareColor(i)} ${activePosArr.includes(+i) ? 'active' : ''}`}
-          key={i}
-        >
-          {activePosArr.includes(+i) && <svg className="active" />}
-          {displayCoordinates(i)}
-          {piecesArr.map((j) =>
-            j.pos === +i ? <Piece piece={j.piece} key={i} /> : false
-          )}
-          {movesArr?.map((k) =>
-            +i === k ? <div className="move-dot" key={k} /> : null
-          )}
-        </div>
-      ))}
+      {squaresArr}
     </div>
   );
 }
