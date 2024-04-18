@@ -32,8 +32,13 @@
     justify-content: center;
     user-select: none;
 
+    &.hovered {
+      border: 0.5vh solid rgba($color: #fff, $alpha: 0.75);
+      box-sizing: border-box;
+    }
+
     .active {
-      z-index: 1;
+      z-index: 2;
       height: inherit;
       width: inherit;
       position: absolute;

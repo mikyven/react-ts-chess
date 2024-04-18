@@ -1,7 +1,7 @@
 import { ReactElement, useRef, useState } from 'react';
 import '../styles/Board.scss';
 import { Piece } from './Pieces';
-// import { onPieceGrab } from './PiecesGrabHandlers';
+import { onPieceGrab } from './PiecesGrabHandlers';
 
 export function Board(): ReactElement {
   interface PieceObj {
@@ -130,7 +130,6 @@ export function Board(): ReactElement {
       },
     ])
   );
-  // const posArr = Object.values(piecesArr).map((i) => i.pos);
 
   const [activePosArr, setActivePosArr] = useState<number[]>([]);
   const [activePiece, setActivePiece] = useState<HTMLElement | null>(null);
@@ -157,28 +156,50 @@ export function Board(): ReactElement {
     }
   };
 
+  const findSquare = (e: React.MouseEvent): number => {
+    if (boardRef.current) {
+      const squareSize = boardRef.current.offsetHeight / 8;
+
+      const boardLeft = boardRef.current.offsetLeft;
+      const newX = e.clientX;
+      const xSquare = Math.ceil((newX - boardLeft) / squareSize);
+
+      const bodyHeight = document.body.offsetHeight;
+      const boardTop = boardRef.current.offsetTop;
+      const newY = e.clientY;
+      const ySquare = Math.ceil((bodyHeight - newY - boardTop) / squareSize);
+
+      return +`${ySquare}${xSquare}`;
+    }
+    return 0;
+  };
+
   const onMouseDown = (e: React.MouseEvent): void => {
     const p = e.target as HTMLElement;
 
     if (
-      activePiece &&
-      activePiece.classList[1][0] === turn &&
-      ((p.children.length > 0 && p.children[0].classList.contains('hint')) ||
-        p.classList.contains('hint'))
+      p.parentElement &&
+      (Object.values(p.parentElement.children).some((i) =>
+        i.classList.contains('hint')
+      ) ||
+        p.classList.contains('hint') ||
+        p.firstElementChild?.classList.contains('hint'))
     ) {
       let el = p;
+      if (!p.firstElementChild?.classList.contains('hint'))
+        el = p.parentElement;
 
-      if (p.classList.contains('hint') && p.parentElement) el = p.parentElement;
-
-      const pos = +el.classList[1].slice(-2);
-      movePiece(pos);
-      return;
+      if (activePiece && activePiece.classList[1][0] === turn) {
+        const pos = +el.classList[1].slice(-2);
+        movePiece(pos);
+        return;
+      }
     }
 
     setMovesArr([]);
     setCapturesArr([]);
     setActivePosArr([]);
-    if (p.classList.contains('piece')) {
+    if (p.classList.contains('piece') && !activePiece) {
       setIsMouseDown(true);
       p.classList.add('dragging');
       setActivePiece(p);
@@ -186,15 +207,14 @@ export function Board(): ReactElement {
         const pos = +p.parentElement.classList[1].slice(-2);
         setActivePosArr([pos]);
         if (p.classList[1][0] === turn) {
-          // const arr = onPieceGrab(
-          //   p.classList[1],
-          //   pos,
-          //   posArr,
-          //   piecesArr.map((i) => i.piece)
-          // );
-          // arr[0] and arr[1] under; if i put it there now it'll be an error
-          setMovesArr([]);
-          setCapturesArr([]);
+          const arr = onPieceGrab(
+            p.classList[1],
+            pos,
+            piecesArr.map((i) => i.pos),
+            piecesArr.map((i) => i.piece)
+          );
+          setMovesArr(arr[0]);
+          setCapturesArr(arr[1]);
         }
       }
     }
@@ -224,6 +244,14 @@ export function Board(): ReactElement {
 
       activePiece.style.left = `${x}px`;
       activePiece.style.top = `${y}px`;
+
+      Object.values(boardRef.current.children)
+        .map((i) => {
+          i.classList.remove('hovered');
+          return i;
+        })
+        .find((i) => i.classList.contains(`square-${findSquare(e)}`))
+        ?.classList.add('hovered');
     }
   };
 
@@ -237,19 +265,10 @@ export function Board(): ReactElement {
       const p = e.target as HTMLElement;
 
       if (p.classList[1][0] === turn && boardRef.current && movesArr) {
-        const squareSize = boardRef.current.offsetHeight / 8;
-
-        const bodyHeight = document.body.offsetHeight;
-        const boardTop = boardRef.current.offsetTop;
-        const y = e.clientY;
-        const ySquare = Math.ceil((bodyHeight - y - boardTop) / squareSize);
-
-        const boardLeft = boardRef.current.offsetLeft;
-        const x = e.clientX;
-        const xSquare = Math.ceil((x - boardLeft) / squareSize);
-
-        const newPos = +`${ySquare}${xSquare}`;
-
+        const newPos = findSquare(e);
+        Object.values(boardRef.current.children)
+          .find((i) => i.classList.contains(`square-${newPos}`))
+          ?.classList.remove('hovered');
         movePiece(newPos);
       }
     }

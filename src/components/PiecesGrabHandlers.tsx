@@ -23,10 +23,19 @@ export function onPieceGrab(
   curPos: number,
   posArr: number[],
   piecesArr: string[]
-): number[] | number[][] {
+): number[][] {
   const color = piece[0];
+  const moveFilter = (i: number): boolean =>
+    !posArr.includes(i) && `${i}`.match(/[1-8]/g)?.length === `${i}`.length;
+  const captureFilter = (i: number): boolean =>
+    posArr.includes(i) &&
+    `${i}`.match(/[1-8]/g)?.length === `${i}`.length &&
+    piecesArr[posArr.indexOf(i)][0] !== color &&
+    piecesArr[posArr.indexOf(i)][1] !== 'k';
+
   function findPawnMoves(): number[][] {
     const movesArr: number[] = [];
+    const capturesArr: number[] = [];
     const movesNumber =
       (color === 'w' && curPos <= 28) || (color === 'b' && curPos >= 71)
         ? 20
@@ -34,29 +43,41 @@ export function onPieceGrab(
 
     for (
       let i = color === 'w' ? curPos + 10 : curPos - movesNumber;
-      i <= (color === 'w' ? curPos + movesNumber : curPos) &&
-      !posArr.includes(i) &&
-      i >= 11 &&
-      i <= 88;
+      i <= (color === 'w' ? curPos + movesNumber : curPos);
       i += 10
     ) {
       movesArr.push(i);
+      if (color === 'w' ? i === curPos + 10 : i === curPos - 10)
+        capturesArr.push(i - 1, i + 1);
     }
 
-    return [
-      movesArr,
-      posArr.filter(
-        (i) =>
-          (color === 'w'
-            ? i === curPos + 9 || i === curPos + 11
-            : i === curPos - 9 || i === curPos - 11) &&
-          piecesArr[posArr.indexOf(i)][0] !== piece[0]
-      ),
-    ];
+    return [movesArr.filter(moveFilter), capturesArr.filter(captureFilter)];
   }
 
-  function findStraightMoves(): number[] {
-    const movesArr: number[] = [];
+  function findKnightMoves(): number[][] {
+    const arr: number[] = [];
+    for (let i = curPos - 20; i <= curPos + 21; i += 40) {
+      arr.push(i - 1, i + 1);
+    }
+    for (let i = curPos - 10; i <= curPos + 12; i += 20) {
+      arr.push(i - 2, i + 2);
+    }
+
+    return [arr.filter(moveFilter), arr.filter(captureFilter)];
+  }
+
+  function findKingMoves(): number[][] {
+    const arr: number[] = [];
+
+    for (let i = curPos - 10; i <= curPos + 10; i += 10) {
+      arr.push(i - 1, i, i + 1);
+    }
+
+    return [arr.filter(moveFilter), arr.filter(captureFilter)];
+  }
+
+  function findStraightMoves(): number[][] {
+    const arr: number[] = [];
 
     const nearPieces: Record<'up' | 'down' | 'right' | 'left', number> = {
       up: findNearestPiece(posArr, curPos, 0, '>'),
@@ -70,34 +91,20 @@ export function onPieceGrab(
       i <= (nearPieces.up || +'8'.concat(`${curPos}`[1]));
       i += 10
     ) {
-      movesArr.push(i);
+      arr.push(i);
     }
     for (
       let i = nearPieces.left || +`${curPos}`[0].concat('1');
       i <= (nearPieces.right || +`${curPos}`[0].concat('8'));
       i += 1
     ) {
-      movesArr.push(i);
+      arr.push(i);
     }
 
-    return movesArr.filter((i) => !posArr.includes(i));
+    return [arr.filter(moveFilter), arr.filter(captureFilter)];
   }
 
-  function findKnightMoves(): number[] {
-    const movesArr: number[] = [];
-    for (let i = curPos - 20; i <= curPos + 21; i += 40) {
-      movesArr.push(i - 1, i + 1);
-    }
-    for (let i = curPos - 10; i <= curPos + 12; i += 20) {
-      movesArr.push(i - 2, i + 2);
-    }
-
-    return movesArr.filter(
-      (i) => !posArr.includes(i) && i >= 11 && i <= 88 && +`${i}`[1] <= 8
-    );
-  }
-
-  function findDiagonalMoves(): number[] {
+  function findDiagonalMoves(): number[][] {
     const movesArr: number[] = [];
 
     const findFurthestPos = (
@@ -132,24 +139,7 @@ export function onPieceGrab(
       if (i !== curPos) movesArr.push(i);
     }
 
-    return movesArr;
-  }
-
-  function findKingMoves(): number[][] {
-    const movesArr: number[] = [];
-
-    // it's not according to the rules now, but i'll remake it later
-
-    for (let i = curPos - 10; i <= curPos + 10; i += 10) {
-      movesArr.push(i - 1, i, i + 1);
-    }
-
-    return [
-      movesArr.filter((i) => !posArr.includes(i)),
-      movesArr.filter(
-        (i) => posArr.includes(i) && piecesArr[posArr.indexOf(i)][0] !== color
-      ),
-    ];
+    return [movesArr, []];
   }
 
   switch (piece[1]) {

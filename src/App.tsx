@@ -3,7 +3,7 @@ import './styles/App.scss';
 import { Board } from './components/Board';
 
 export function App(): ReactElement {
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [isPlaying, setIsPlaying] = useState<boolean>(true);
 
   return (
     <>
