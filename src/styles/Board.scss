@@ -5,23 +5,36 @@
   grid-template-columns: repeat(8, 1fr);
   grid-template-rows: repeat(8, 1fr);
 
-  .coordinate {
-    font-size: 20px;
+  .coordinate_parent {
     position: absolute;
-    margin: 0;
-    user-select: none;
-  }
+    height: inherit;
+    width: inherit;
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
 
-  .coordinate__number {
-    align-self: flex-start;
-    text-align: left;
-    width: calc(75vh / 8 - 3px);
-  }
+    .coordinates_vertical {
+      height: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: calc(75vh / 8 - 25px);
+    }
 
-  .coordinate__letter {
-    align-self: flex-end;
-    text-align: right;
-    width: calc(75vh / 8 - 3px);
+    .coordinates_horizontal {
+      width: inherit;
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+      gap: calc(75vh / 8 - 20px);
+    }
+
+    .coordinate {
+      font-size: 20px;
+      user-select: none;
+      width: 20px;
+      height: 25px;
+      margin: 0;
+    }
   }
 
   .square {

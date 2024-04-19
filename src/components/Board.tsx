@@ -13,32 +13,6 @@ export function Board(): ReactElement {
     return (+sqrNum[0] + +sqrNum[1]) % 2 === 0 ? 'black' : 'white';
   }
 
-  function displayCoordinates(sqrNum: string): ReactElement | boolean {
-    const lettersArr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-
-    if (sqrNum[1] === '1' && sqrNum[0] !== '1') {
-      return <p className="coordinate coordinate__number">{sqrNum[0]}</p>;
-    }
-    if (sqrNum[0] === '1' && sqrNum[1] !== '1') {
-      return (
-        <p className="coordinate coordinate__letter">
-          {lettersArr[+sqrNum[1] - 1]}
-        </p>
-      );
-    }
-    if (sqrNum[0] === '1' && sqrNum[1] === '1') {
-      return (
-        <>
-          <p className="coordinate coordinate__number">{sqrNum[0]}</p>
-          <p className="coordinate coordinate__letter">
-            {lettersArr[+sqrNum[1] - 1]}
-          </p>
-        </>
-      );
-    }
-    return false;
-  }
-
   const [movesArr, setMovesArr] = useState<number[] | null>(null);
   const [capturesArr, setCapturesArr] = useState<number[] | null>(null);
 
@@ -134,7 +108,6 @@ export function Board(): ReactElement {
   const [activePosArr, setActivePosArr] = useState<number[]>([]);
   const [activePiece, setActivePiece] = useState<HTMLElement | null>(null);
   const boardRef = useRef<HTMLDivElement | null>(null);
-
   const [isMouseDown, setIsMouseDown] = useState(false);
   const [move, setMove] = useState<number>(0);
   const turn = move % 2 === 0 ? 'w' : 'b';
@@ -147,6 +120,7 @@ export function Board(): ReactElement {
           .map((i) =>
             activePosArr.includes(i.pos) ? { piece: i.piece, pos: newPos } : i
           )
+          .sort((a, b) => a.pos - b.pos)
       );
       setMove(move + 1);
       setMovesArr([]);
@@ -159,7 +133,6 @@ export function Board(): ReactElement {
   const findSquare = (e: React.MouseEvent): number => {
     if (boardRef.current) {
       const squareSize = boardRef.current.offsetHeight / 8;
-
       const boardLeft = boardRef.current.offsetLeft;
       const newX = e.clientX;
       const xSquare = Math.ceil((newX - boardLeft) / squareSize);
@@ -175,46 +148,48 @@ export function Board(): ReactElement {
   };
 
   const onMouseDown = (e: React.MouseEvent): void => {
-    const p = e.target as HTMLElement;
+    if (e.button === 0) {
+      const p = e.target as HTMLElement;
 
-    if (
-      p.parentElement &&
-      (Object.values(p.parentElement.children).some((i) =>
-        i.classList.contains('hint')
-      ) ||
-        p.classList.contains('hint') ||
-        p.firstElementChild?.classList.contains('hint'))
-    ) {
-      let el = p;
-      if (!p.firstElementChild?.classList.contains('hint'))
-        el = p.parentElement;
+      if (
+        p.parentElement &&
+        (Object.values(p.parentElement.children).some((i) =>
+          i.classList.contains('hint')
+        ) ||
+          p.classList.contains('hint') ||
+          p.firstElementChild?.classList.contains('hint'))
+      ) {
+        let el = p;
+        if (!p.firstElementChild?.classList.contains('hint'))
+          el = p.parentElement;
 
-      if (activePiece && activePiece.classList[1][0] === turn) {
-        const pos = +el.classList[1].slice(-2);
-        movePiece(pos);
-        return;
+        if (activePiece && activePiece.classList[1][0] === turn) {
+          const pos = +el.classList[1].slice(-2);
+          movePiece(pos);
+          return;
+        }
       }
-    }
 
-    setMovesArr([]);
-    setCapturesArr([]);
-    setActivePosArr([]);
-    if (p.classList.contains('piece') && !activePiece) {
-      setIsMouseDown(true);
-      p.classList.add('dragging');
-      setActivePiece(p);
-      if (p.parentElement) {
-        const pos = +p.parentElement.classList[1].slice(-2);
-        setActivePosArr([pos]);
-        if (p.classList[1][0] === turn) {
-          const arr = onPieceGrab(
-            p.classList[1],
-            pos,
-            piecesArr.map((i) => i.pos),
-            piecesArr.map((i) => i.piece)
-          );
-          setMovesArr(arr[0]);
-          setCapturesArr(arr[1]);
+      setMovesArr([]);
+      setCapturesArr([]);
+      setActivePosArr([]);
+      if (p.classList.contains('piece')) {
+        setIsMouseDown(true);
+        p.classList.add('dragging');
+        setActivePiece(p);
+        if (p.parentElement) {
+          const pos = +p.parentElement.classList[1].slice(-2);
+          setActivePosArr([pos]);
+          if (p.classList[1][0] === turn) {
+            const arr = onPieceGrab(
+              p.classList[1],
+              pos,
+              piecesArr.map((i) => i.pos),
+              piecesArr.map((i) => i.piece)
+            );
+            setMovesArr(arr[0]);
+            setCapturesArr(arr[1]);
+          }
         }
       }
     }
@@ -257,24 +232,24 @@ export function Board(): ReactElement {
 
   const onMouseUp = (e: React.MouseEvent): void => {
     setIsMouseDown(false);
-    if (activePiece) {
+    if (activePiece && boardRef.current) {
       activePiece.classList.remove('dragging');
       activePiece.style.left = '';
       activePiece.style.top = '';
+      const newPos = findSquare(e);
+      Object.values(boardRef.current.children)
+        .find((i) => i.classList.contains(`square-${newPos}`))
+        ?.classList.remove('hovered');
       if (activePosArr.length === 0) setActivePiece(null);
       const p = e.target as HTMLElement;
 
-      if (p.classList[1][0] === turn && boardRef.current && movesArr) {
-        const newPos = findSquare(e);
-        Object.values(boardRef.current.children)
-          .find((i) => i.classList.contains(`square-${newPos}`))
-          ?.classList.remove('hovered');
+      if (p.classList[1][0] === turn && (movesArr || capturesArr)) {
         movePiece(newPos);
       }
     }
   };
 
-  const squaresArr = [];
+  const squaresArr: ReactElement[] = [];
 
   for (let x = 1; x <= 8; x++) {
     for (let y = 1; y <= 8; y++) {
@@ -285,7 +260,6 @@ export function Board(): ReactElement {
           key={pos}
         >
           {activePosArr.includes(+pos) && <svg className="active" />}
-          {displayCoordinates(pos)}
           {piecesArr.map((j) =>
             j.pos === +pos ? <Piece piece={j.piece} key={pos} /> : false
           )}
@@ -300,6 +274,21 @@ export function Board(): ReactElement {
     }
   }
 
+  const coordinates: ReactElement[][] = [[], []];
+
+  for (let x = 1, y = 1; x <= 8 && y <= 8; x++, y++) {
+    coordinates[0].push(
+      <div className="coordinate coordinate_number" key={x + 947}>
+        {x}
+      </div>
+    );
+    coordinates[1].push(
+      <div className="coordinate coordinate_letter" key={y + 484}>
+        {String.fromCharCode(y + 96)}
+      </div>
+    );
+  }
+
   return (
     <div
       className="board"
@@ -308,7 +297,37 @@ export function Board(): ReactElement {
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
     >
+      <div className="coordinate_parent">
+        <div className="coordinates_vertical">{coordinates[0]}</div>
+        <div className="coordinates_horizontal">{coordinates[1]}</div>
+      </div>
       {squaresArr}
     </div>
   );
 }
+
+// function displayCoordinates(sqrNum: string): ReactElement | boolean {
+//   const lettersArr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+
+//   if (sqrNum[1] === '1' && sqrNum[0] !== '1') {
+//     return <p className="coordinate coordinate__number">{sqrNum[0]}</p>;
+//   }
+//   if (sqrNum[0] === '1' && sqrNum[1] !== '1') {
+//     return (
+//       <p className="coordinate coordinate__letter">
+//         {lettersArr[+sqrNum[1] - 1]}
+//       </p>
+//     );
+//   }
+//   if (sqrNum[0] === '1' && sqrNum[1] === '1') {
+//     return (
+//       <>
+//         <p className="coordinate coordinate__number">{sqrNum[0]}</p>
+//         <p className="coordinate coordinate__letter">
+//           {lettersArr[+sqrNum[1] - 1]}
+//         </p>
+//       </>
+//     );
+//   }
+//   return false;
+// }

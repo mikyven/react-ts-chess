@@ -105,7 +105,7 @@ export function onPieceGrab(
   }
 
   function findDiagonalMoves(): number[][] {
-    const movesArr: number[] = [];
+    const arr: number[] = [];
 
     const findFurthestPos = (
       pos: number,
@@ -115,31 +115,34 @@ export function onPieceGrab(
       let minPos: number = 0;
       for (
         let i = pos;
-        !`${i}`.split('').some((j) => +j < 1 || +j > 8) &&
-        i >= 11 &&
-        i <= 88 &&
+        `${i}`.match(/[1-8]/g)?.length === 2 &&
         (!posArr.includes(i) || i === curPos);
         type === 'max' ? (i += val) : (i -= val)
       ) {
         minPos = i;
+        if (posArr.includes(type === 'max' ? i + val : i - val))
+          minPos = type === 'max' ? i + val : i - val;
       }
       return minPos;
     };
 
-    const firstMin = findFurthestPos(curPos, 11, 'min');
-    const firstMax = findFurthestPos(curPos, 11, 'max');
-    const secondMin = findFurthestPos(curPos, 9, 'min');
-    const secondMax = findFurthestPos(curPos, 9, 'max');
+    const MinMaxPosObj = {
+      1: [
+        findFurthestPos(curPos, 11, 'min'),
+        findFurthestPos(curPos, 11, 'max'),
+      ],
+      2: [findFurthestPos(curPos, 9, 'min'), findFurthestPos(curPos, 9, 'max')],
+    };
 
-    for (let i = firstMin; i <= firstMax; i += 11) {
-      if (i !== curPos) movesArr.push(i);
+    for (let i = MinMaxPosObj[1][0]; i <= MinMaxPosObj[1][1]; i += 11) {
+      if (i !== curPos) arr.push(i);
     }
 
-    for (let i = secondMin; i <= secondMax; i += 9) {
-      if (i !== curPos) movesArr.push(i);
+    for (let i = MinMaxPosObj[2][0]; i <= MinMaxPosObj[2][1]; i += 9) {
+      if (i !== curPos) arr.push(i);
     }
 
-    return [movesArr, []];
+    return [arr.filter(moveFilter), arr.filter(captureFilter)];
   }
 
   switch (piece[1]) {
@@ -152,7 +155,9 @@ export function onPieceGrab(
     case 'b':
       return findDiagonalMoves();
     case 'q':
-      return findStraightMoves().concat(findDiagonalMoves());
+      return findStraightMoves().map((i, index) =>
+        i.concat(findDiagonalMoves()[index])
+      );
     case 'k':
       return findKingMoves();
     default:
