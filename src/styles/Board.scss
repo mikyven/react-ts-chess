@@ -6,6 +6,7 @@
   grid-template-rows: repeat(8, 1fr);
 
   .coordinate_parent {
+    z-index: 0;
     position: absolute;
     height: inherit;
     width: inherit;
@@ -14,26 +15,72 @@
     flex-direction: column;
 
     .coordinates_vertical {
+      margin-top: 0.5vh;
       height: inherit;
       display: flex;
       flex-direction: column;
-      gap: calc(75vh / 8 - 25px);
+      gap: calc(75vh / 8 - 1.25vw);
+
+      .coordinate:nth-child(even) {
+        color: #f0d9b5;
+      }
+
+      .coordinate:nth-child(odd) {
+        color: #b58863;
+      }
     }
 
     .coordinates_horizontal {
+      margin-bottom: 0.5vh;
       width: inherit;
       display: flex;
       flex-direction: row;
       justify-content: flex-end;
-      gap: calc(75vh / 8 - 20px);
+      gap: calc(75vh / 8 - 1.25vw);
+
+      .coordinate:nth-child(odd) {
+        color: #f0d9b5;
+      }
+
+      .coordinate:nth-child(even) {
+        color: #b58863;
+      }
     }
 
     .coordinate {
-      font-size: 20px;
+      font-size: 1.1vw;
+      font-weight: 500;
       user-select: none;
-      width: 20px;
-      height: 25px;
+      width: 1.25vw;
+      height: 1.25vw;
       margin: 0;
+    }
+  }
+
+  &.flipped {
+    .coordinates_vertical {
+      flex-direction: column-reverse;
+      justify-content: flex-end;
+
+      .coordinate:nth-child(odd) {
+        color: #f0d9b5;
+      }
+
+      .coordinate:nth-child(even) {
+        color: #b58863;
+      }
+    }
+    .coordinates_horizontal {
+      flex-direction: row-reverse;
+      justify-content: flex-start;
+
+      .coordinate:nth-child(even) {
+        color: #f0d9b5;
+      }
+
+      .coordinate:nth-child(odd) {
+        color: #b58863;
+      }
     }
   }
 

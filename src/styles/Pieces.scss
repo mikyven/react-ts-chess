@@ -18,20 +18,28 @@
 }
 
 .hint {
+  position: absolute;
   align-self: center;
   z-index: 1;
-  border-radius: 50%;
+  height: calc(75vh / 8);
+  width: calc(75vh / 8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  &.hint_move {
+  .hint_child {
+    border-radius: 50%;
+  }
+
+  .hint_move {
     height: 3.25vh;
     width: 3.25vh;
     background-color: rgba(0, 0, 0, 0.15);
   }
 
-  &.hint_capture {
-    position: absolute;
-    height: calc(75vh / 8);
-    width: calc(75vh / 8);
+  .hint_capture {
+    height: inherit;
+    width: inherit;
     border: 1vh solid rgba(0, 0, 0, 0.15);
     box-sizing: border-box;
   }

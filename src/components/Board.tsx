@@ -3,7 +3,8 @@ import '../styles/Board.scss';
 import { Piece } from './Pieces';
 import { onPieceGrab } from './PiecesGrabHandlers';
 
-export function Board(): ReactElement {
+export function Board(props: { flipped: boolean }): ReactElement {
+  const { flipped } = props;
   interface PieceObj {
     piece: string;
     pos: number;
@@ -153,15 +154,12 @@ export function Board(): ReactElement {
 
       if (
         p.parentElement &&
-        (Object.values(p.parentElement.children).some((i) =>
-          i.classList.contains('hint')
-        ) ||
-          p.classList.contains('hint') ||
-          p.firstElementChild?.classList.contains('hint'))
+        (p.classList.contains('hint') || p.classList.contains('hint_child'))
       ) {
-        let el = p;
-        if (!p.firstElementChild?.classList.contains('hint'))
-          el = p.parentElement;
+        const parent = p.parentElement;
+        let el = parent;
+        if (parent.parentElement && p.classList.contains('hint_child'))
+          el = parent.parentElement;
 
         if (activePiece && activePiece.classList[1][0] === turn) {
           const pos = +el.classList[1].slice(-2);
@@ -251,8 +249,16 @@ export function Board(): ReactElement {
 
   const squaresArr: ReactElement[] = [];
 
-  for (let x = 1; x <= 8; x++) {
-    for (let y = 1; y <= 8; y++) {
+  for (
+    let x = flipped ? 8 : 1;
+    flipped ? x >= 1 : x <= 8;
+    flipped ? x-- : x++
+  ) {
+    for (
+      let y = flipped ? 8 : 1;
+      flipped ? y >= 1 : y <= 8;
+      flipped ? y-- : y++
+    ) {
       const pos = `${9 - x}${y}`;
       squaresArr.push(
         <div
@@ -264,10 +270,18 @@ export function Board(): ReactElement {
             j.pos === +pos ? <Piece piece={j.piece} key={pos} /> : false
           )}
           {movesArr?.map((k) =>
-            +pos === k ? <div className="hint hint_move" key={k} /> : null
+            +pos === k ? (
+              <div className="hint" key={k - 2387}>
+                <div className="hint_child hint_move" />
+              </div>
+            ) : null
           )}
           {capturesArr?.map((k) =>
-            +pos === k ? <div className="hint hint_capture" key={k} /> : null
+            +pos === k ? (
+              <div className="hint" key={k + 9871}>
+                <div className="hint_child hint_capture" />
+              </div>
+            ) : null
           )}
         </div>
       );
@@ -278,12 +292,12 @@ export function Board(): ReactElement {
 
   for (let x = 1, y = 1; x <= 8 && y <= 8; x++, y++) {
     coordinates[0].push(
-      <div className="coordinate coordinate_number" key={x + 947}>
-        {x}
+      <div className="coordinate" key={x + 947}>
+        {9 - x}
       </div>
     );
     coordinates[1].push(
-      <div className="coordinate coordinate_letter" key={y + 484}>
+      <div className="coordinate" key={y + 484}>
         {String.fromCharCode(y + 96)}
       </div>
     );
@@ -291,7 +305,7 @@ export function Board(): ReactElement {
 
   return (
     <div
-      className="board"
+      className={`board${flipped ? ' flipped' : ''}`}
       ref={boardRef}
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
@@ -305,29 +319,3 @@ export function Board(): ReactElement {
     </div>
   );
 }
-
-// function displayCoordinates(sqrNum: string): ReactElement | boolean {
-//   const lettersArr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-
-//   if (sqrNum[1] === '1' && sqrNum[0] !== '1') {
-//     return <p className="coordinate coordinate__number">{sqrNum[0]}</p>;
-//   }
-//   if (sqrNum[0] === '1' && sqrNum[1] !== '1') {
-//     return (
-//       <p className="coordinate coordinate__letter">
-//         {lettersArr[+sqrNum[1] - 1]}
-//       </p>
-//     );
-//   }
-//   if (sqrNum[0] === '1' && sqrNum[1] === '1') {
-//     return (
-//       <>
-//         <p className="coordinate coordinate__number">{sqrNum[0]}</p>
-//         <p className="coordinate coordinate__letter">
-//           {lettersArr[+sqrNum[1] - 1]}
-//         </p>
-//       </>
-//     );
-//   }
-//   return false;
-// }
